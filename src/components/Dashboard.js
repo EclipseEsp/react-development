@@ -22,6 +22,7 @@ import ChatDemo from './ChatDemo'
 
 import { useEffect } from "react";
 import socketIOClient from "socket.io-client";
+import serveStatic from 'serve-static';
 const ENDPOINT = "http://localhost:8000";
 
 function Copyright() {
@@ -124,10 +125,14 @@ export default function Dashboard() {
   const [input,setInput] = React.useState('');
   const [status,setConnection] = React.useState(false);
   const [response, setResponse] = React.useState("");
+  
+  // State for navigation bar
+  const [socketBtn, setSocketBtn] = React.useState(false);
+
   var io = null;
   var socket = null;
-  // Establish initiate connection with Server
   
+  // Establish initiate connection with Server
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -138,16 +143,16 @@ export default function Dashboard() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   useEffect( () =>{
-    io = require('socket.io-client').connect('http://localhost:8000');
-    //socket = io.connect('http://localhost:8000');
-    setConnection(true);
-    io.on('news', (data) => {
-      console.log(data);
-      io.emit('my other event', { my: 'data' });
-    });
-    io.on('error', function (err) {
-      console.log(err);
-  });
+  //   io = require('socket.io-client').connect('http://localhost:8000');
+  //   //socket = io.connect('http://localhost:8000');
+  //   setConnection(true);
+  //   io.on('news', (data) => {
+  //     console.log(data);
+  //     io.emit('my other event', { my: 'data' });
+  //   });
+  //   io.on('error', function (err) {
+  //     console.log(err);
+  // });
   },[]);
 
   const connectionStatus = () => {
@@ -170,14 +175,61 @@ export default function Dashboard() {
     socket.on('news', (data) => {
       console.log(data);
       // 'my other event' is a namespace, need to correlate to namespace on server.js
-      socket.emit('from client', { message: input });
+      socket.emit('Client1', { user_id: '1003571',  message: input }); // Send message to server.js
     });
     socket.on('error', function (err) {
       console.log(err);
   });
-    
-    setInput('');
+  
+    setInput(''); // Clear message from textbox
   };
+
+  const handleSocketBtn = (e) => {
+    e.preventDefault();
+    socketBtn === false ? setSocketBtn(true) : setSocketBtn(false);
+    return (SocketPage())
+  }
+
+  const SocketPage = (props) => {
+    console.log("Clicked: handleSocketBtn, " + socketBtn );
+    if(socketBtn == true){
+    return(
+        <Container maxWidth="lg" className={classes.container}>
+          <Grid container spacing={3}>
+
+            {/* Chart */}
+            <Grid item xs={12} md={8} lg={11}>
+              <Paper className={fixedHeightPaper}>
+                  <h1>Socket Demo</h1>
+                  <p> abcdefnioasjdiasjmfmaskldmklsamdklasmlkd</p>
+              </Paper>
+            </Grid>
+
+            {/* Recent Orders */}
+            <Grid item xs={12} md={8} lg={11}>
+              <Paper className={fixedHeightPaper}>
+                  <h1>Client 1</h1>
+                  <div className="Client1">
+                  <button className="Client1Status" onClick={connectionStatus}> Connect </button>
+                  <p />
+                  <form className="Client1Form">
+                    <label>
+                      <input id="input" value={input} onChange={handleChange} type="text" name="name" placeholder="Type Message..."/>
+                    </label>
+                    <input type="submit" value="Submit" onClick={handleSubmit}/>
+                  </form>
+                  </div>
+              </Paper>
+            </Grid>
+            
+          </Grid>
+          <Box pt={4}>
+          </Box>
+          <ChatDemo/>
+        </Container>
+    )
+    }else return null;
+  }
 
   return (
     <div className={classes.root}>
@@ -216,47 +268,21 @@ export default function Dashboard() {
           </IconButton>
         </div>
         <Divider />
-            <h1 style={{textAlign: "center"}}>Projects</h1>
+            <h1 style={{textAlign: "center"}} onClick={handleSocketBtn}>Projects</h1>
         <Divider />
             <h1 style={{textAlign: "center"}}>Socket</h1>
         <Divider />
-            <h1 style={{textAlign: "center"}}>HTTP</h1>
+            <h1 style={{textAlign: "center"}}>Draw</h1>
         <Divider />
             <h1 style={{textAlign: "center"}}>Fetch</h1>
         <Divider />
-      </Drawer>
+      </Drawer> 
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={3}>
-            {/* Chart */}
-            <Grid item xs={12} md={8} lg={11}>
-              <Paper className={fixedHeightPaper}>
-                  <h1>Socket Demo</h1>
-                  <p> abcdefnioasjdiasjmfmaskldmklsamdklasmlkd</p>
-              </Paper>
-            </Grid>
-            {/* Recent Orders */}
-            <Grid item xs={12} md={8} lg={11}>
-              <Paper className={fixedHeightPaper}>
-                  <h1>Client 1</h1>
-                  <div className="Client1">
-                  <button className="Client1Status" onClick={connectionStatus}> Connect </button>
-                  <form className="Client1Form">
-                    <label>
-                      <input id="input" value={input} onChange={handleChange} type="text" name="name" placeholder="Type Message..."/>
-                    </label>
-                    <input type="submit" value="Submit" onClick={handleSubmit}/>
-                  </form>
-                  </div>
-              </Paper>
-            </Grid>
-          </Grid>
-          <Box pt={4}>
-          </Box>
-        </Container>
+          <div className='Page Content'>
+            {socketBtn && <SocketPage/>}
+          </div>
       </main>
-      <ChatDemo />
     </div>
   );
 }
